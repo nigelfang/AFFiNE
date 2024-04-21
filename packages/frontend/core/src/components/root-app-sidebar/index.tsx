@@ -4,7 +4,11 @@ import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
 import { CollectionService } from '@affine/core/modules/collection';
 import { apis, events } from '@affine/electron-api';
 import { useAFFiNEI18N } from '@affine/i18n/hooks';
-import { FolderIcon, SettingsIcon } from '@blocksuite/icons';
+import {
+  FolderIcon,
+  InformationFillDuotoneIcon,
+  SettingsIcon,
+} from '@blocksuite/icons';
 import type { Doc } from '@blocksuite/store';
 import { useDroppable } from '@dnd-kit/core';
 import type { Workspace } from '@toeverything/infra';
@@ -192,6 +196,14 @@ export const RootAppSidebar = ({
           data-testid="slider-bar-quick-search-button"
           onClick={onOpenQuickSearchModal}
         />
+        <MenuItem
+          icon={<InformationFillDuotoneIcon />}
+          onClick={() => {
+            console.log('hello!!');
+          }}
+        >
+          Add Text
+        </MenuItem>
         <RouteMenuLinkItem
           icon={<FolderIcon />}
           active={allPageActive}
