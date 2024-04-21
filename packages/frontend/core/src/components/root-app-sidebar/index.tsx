@@ -173,7 +173,13 @@ export const RootAppSidebar = ({
   const allPageActive = currentPath === '/all';
 
   const trashActive = currentPath === '/trash';
-
+  const handleAddText = (textToAdd: string) => {
+    return () => {
+      const richText = document?.querySelectorAll('rich-text')[1];
+      if (!richText) return;
+      richText?.inlineEditor?.insertText({ index: 0, length: 0 }, textToAdd);
+    };
+  };
   return (
     <AppSidebar
       clientBorder={appSettings.clientBorder}
@@ -197,10 +203,9 @@ export const RootAppSidebar = ({
           onClick={onOpenQuickSearchModal}
         />
         <MenuItem
+          className="mb-2"
           icon={<InformationFillDuotoneIcon />}
-          onClick={() => {
-            console.log('hello!!');
-          }}
+          onClick={handleAddText('hello')}
         >
           Add Text
         </MenuItem>
