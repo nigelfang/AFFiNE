@@ -353,7 +353,7 @@ export type GetCopilotHistoriesQuery = {
           role: string;
           content: string;
           attachments: Array<string> | null;
-          createdAt: string | null;
+          createdAt: string;
         }>;
       }>;
     };

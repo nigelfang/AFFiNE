@@ -1,3 +1,4 @@
+import { showAILoginRequiredAtom } from '@affine/core/components/affine/auth/ai-login-required';
 import {
   createCopilotMessageMutation,
   createCopilotSessionMutation,
@@ -5,6 +6,7 @@ import {
   getBaseUrl,
   getCopilotHistoriesQuery,
   getCopilotSessionsQuery,
+  GraphQLError,
   type GraphQLQuery,
   type QueryOptions,
   type RequestOptions,
@@ -14,9 +16,49 @@ import {
   PaymentRequiredError,
   UnauthorizedError,
 } from '@blocksuite/blocks';
+import { getCurrentStore } from '@toeverything/infra';
 
 type OptionsField<T extends GraphQLQuery> =
   RequestOptions<T>['variables'] extends { options: infer U } ? U : never;
+
+function codeToError(code: number) {
+  switch (code) {
+    case 401:
+      return new UnauthorizedError();
+    case 402:
+      return new PaymentRequiredError();
+    default:
+      return new GeneralNetworkError();
+  }
+}
+
+type ErrorType =
+  | GraphQLError[]
+  | GraphQLError
+  | { status: number }
+  | Error
+  | string;
+
+export function resolveError(src: ErrorType) {
+  if (typeof src === 'string') {
+    return new GeneralNetworkError(src);
+  } else if (src instanceof GraphQLError || Array.isArray(src)) {
+    // only resolve the first error
+    const error = Array.isArray(src) ? src.at(0) : src;
+    const code = error?.extensions?.code;
+    return codeToError(code ?? 500);
+  } else {
+    return codeToError(src instanceof Error ? 500 : src.status);
+  }
+}
+
+export function handleError(src: ErrorType) {
+  const err = resolveError(src);
+  if (err instanceof UnauthorizedError) {
+    getCurrentStore().set(showAILoginRequiredAtom, true);
+  }
+  return err;
+}
 
 const fetcher = async <Query extends GraphQLQuery>(
   options: QueryOptions<Query>
@@ -24,17 +66,8 @@ const fetcher = async <Query extends GraphQLQuery>(
   try {
     return await defaultFetcher<Query>(options);
   } catch (_err) {
-    const error = Array.isArray(_err) ? _err.at(0) : _err;
-    const code = error.extensions?.code;
-
-    switch (code) {
-      case 401:
-        throw new UnauthorizedError();
-      case 402:
-        throw new PaymentRequiredError();
-      default:
-        throw new GeneralNetworkError();
-    }
+    const err = _err as GraphQLError | GraphQLError[] | Error | string;
+    throw handleError(err);
   }
 };
 
@@ -97,13 +130,15 @@ export class CopilotClient {
   async chatText({
     sessionId,
     messageId,
+    signal,
   }: {
     sessionId: string;
     messageId: string;
+    signal?: AbortSignal;
   }) {
     const url = new URL(`${this.backendUrl}/api/copilot/chat/${sessionId}`);
     url.searchParams.set('messageId', messageId);
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), { signal });
     return response.text();
   }
 
