@@ -51,6 +51,17 @@ mutation setBlob($workspaceId: String!, $blob: Upload!) {
 }`,
 };
 
+export const addTextMutation = {
+  id: 'addTextMutation' as const,
+  operationName: 'addPageText',
+  definitionName: 'addPageText',
+  containsFile: false,
+  query: `
+mutation addPageText($workspaceId: String!, $text: String!) {
+  setBlob(workspaceId: $workspaceId, text: $text)
+}`,
+};
+
 export const cancelSubscriptionMutation = {
   id: 'cancelSubscriptionMutation' as const,
   operationName: 'cancelSubscription',

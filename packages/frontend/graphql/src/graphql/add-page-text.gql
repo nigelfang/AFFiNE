@@ -1,0 +1,3 @@
+mutation addPageBlob($workspaceId: String!, $text: String!) {
+  addPageText(workspaceId: $workspaceId, text: $text)
+}

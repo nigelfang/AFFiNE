@@ -177,6 +177,13 @@ export type SetBlobMutationVariables = Exact<{
 
 export type SetBlobMutation = { __typename?: 'Mutation'; setBlob: string };
 
+export type AddTextMutationVariables = Exact<{
+  workspaceId: Scalars['String']['input'];
+  text: Scalars['Upload']['input'];
+}>;
+
+export type AddTextMutation = { __typename?: 'Mutation'; addPageText: string };
+
 export type CancelSubscriptionMutationVariables = Exact<{
   idempotencyKey: Scalars['String']['input'];
   plan?: InputMaybe<SubscriptionPlan>;
@@ -1194,6 +1201,11 @@ export type Mutations =
       name: 'setBlobMutation';
       variables: SetBlobMutationVariables;
       response: SetBlobMutation;
+    }
+  | {
+      name: 'addTextMutation';
+      variables: AddTextMutationVariables;
+      response: AddTextMutation;
     }
   | {
       name: 'cancelSubscriptionMutation';
